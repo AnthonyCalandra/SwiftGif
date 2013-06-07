@@ -36,6 +36,21 @@ var swiftgif = {
         document.getElementById("addButton").addEventListener("click", this.framesPanel.add, false);
         document.getElementById("updateButton").addEventListener("click", this.framesPanel.update, false);
         document.getElementById("cancelButton").addEventListener("click", this.resetPage, false);
+        document.getElementById("clearAllButton").addEventListener("click", function() {
+            var doDelete = confirm("Are you sure you want to remove all frames?"),
+                framesList = document.getElementById("framesList");
+            
+            if (doDelete) {
+                var element = framesList.firstElementChild;
+                element = element.nextElementSibling;
+                while(element) {
+                    framesList.removeChild(element);
+                    element = element.nextElementSibling;
+                }
+                
+                this.nextUpdateId = 0;
+            }
+        }, false);
     },
     onDeviceReady: function() {
     },
@@ -62,9 +77,9 @@ var swiftgif = {
         image.src = imageURI;
         image.onload = function() {
             swiftgif.addToPreviewer(image);
-            addButton.className = "continue";
+            addButton.className = "green";
             captureButton.className = "hide";
-            cancelButton.className = "cancel";
+            cancelButton.className = "red";
         };
     },
     onRecaptureSuccess: function(imageURI) {
@@ -76,12 +91,12 @@ var swiftgif = {
         image.src = imageURI;
         image.onload = function() {
             swiftgif.addToPreviewer(image);
-            updateButton.className = "continue";
+            updateButton.className = "green";
             recaptureButton.className = "hide";
         };
     },
     onCameraFailure: function(errorMessage) {
-        if (errorMessage == "Camera cancelled.")
+        if (errorMessage === "Camera cancelled.")
             return;
             
         alert(errorMessage);
@@ -111,7 +126,7 @@ var swiftgif = {
             updateButton = document.getElementById("updateButton");
             
         imagePreview.removeChild(imagePreview.firstChild);
-        captureButton.className = "continue";
+        captureButton.className = "green";
         addButton.className = "hide";
         cancelButton.className = "hide";
         recaptureButton.className = "hide";
@@ -145,8 +160,8 @@ var swiftgif = {
                     swiftgif.addToPreviewer(previewImage);
                     swiftgif.updateId = frameImageElement.id;
                     captureButton.className = "hide";
-                    recaptureButton.className = "continue";
-                    cancelButton.className = "cancel";
+                    recaptureButton.className = "green";
+                    cancelButton.className = "red";
                 };
             }, false);
             
