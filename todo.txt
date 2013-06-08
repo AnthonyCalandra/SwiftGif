@@ -1,0 +1,19 @@
+- Store all frames in an array of Frame objects.
+- Access frames by ID.
+- Add:
+    - Push Frame object into frame list.
+- Update:
+    - Find object using frame ID.
+    - Replace frame image and URI.
+- Clone:
+    - Find object using frame ID.
+    - Take image and image URI.
+    - Push Frame object into frame list.
+- Delete*:
+    - Find object using frame ID.
+    - Delete from array.
+
+Frame object:
+    ~constructor(JSON object);
+        Parameters:
+            -object: frameID, imageURI, image.

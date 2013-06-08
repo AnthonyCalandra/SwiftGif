@@ -96,6 +96,10 @@ input[type=button] {
     background-color: #ED1C24;
 }
 
+.blue {
+    background-color: blue;
+}
+
 .event {
     border-radius:4px;
     -webkit-border-radius:4px;

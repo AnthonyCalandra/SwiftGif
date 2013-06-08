@@ -22,6 +22,7 @@ var swiftgif = {
     initialize: function() {
         this.bindEvents();
         this.nextUpdateId = 0;
+        this.frames = [];
     },
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
@@ -36,21 +37,8 @@ var swiftgif = {
         document.getElementById("addButton").addEventListener("click", this.framesPanel.add, false);
         document.getElementById("updateButton").addEventListener("click", this.framesPanel.update, false);
         document.getElementById("cancelButton").addEventListener("click", this.resetPage, false);
-        document.getElementById("clearAllButton").addEventListener("click", function() {
-            var doDelete = confirm("Are you sure you want to remove all frames?"),
-                framesList = document.getElementById("framesList");
-            
-            if (doDelete) {
-                var element = framesList.firstElementChild;
-                element = element.nextElementSibling;
-                while(element) {
-                    framesList.removeChild(element);
-                    element = element.nextElementSibling;
-                }
-                
-                this.nextUpdateId = 0;
-            }
-        }, false);
+        document.getElementById("clearAllButton").addEventListener("click", this.framesPanel.clearAll, false);
+        document.getElementById("cloneButton").addEventListener("click", this.framesPanel.clone, false);
     },
     onDeviceReady: function() {
     },
@@ -123,7 +111,8 @@ var swiftgif = {
             cancelButton = document.getElementById("cancelButton"),
             addButton = document.getElementById("addButton"),
             recaptureButton = document.getElementById("recaptureButton"),
-            updateButton = document.getElementById("updateButton");
+            updateButton = document.getElementById("updateButton"),
+            cloneButton = document.getElementById("cloneButton");
             
         imagePreview.removeChild(imagePreview.firstChild);
         captureButton.className = "green";
@@ -131,6 +120,7 @@ var swiftgif = {
         cancelButton.className = "hide";
         recaptureButton.className = "hide";
         updateButton.className = "hide";
+        cloneButton.className = "hide";
         this.updateId = "";
     },
     framesPanel: {
@@ -155,12 +145,14 @@ var swiftgif = {
                 previewImage.onload = function() {
                     var captureButton = document.getElementById("captureButton")
                         recaptureButton = document.getElementById("recaptureButton"),
-                        cancelButton = document.getElementById("cancelButton");
+                        cancelButton = document.getElementById("cancelButton"),
+                        cloneButton = document.getElementById("cloneButton");
                         
                     swiftgif.addToPreviewer(previewImage);
                     swiftgif.updateId = frameImageElement.id;
                     captureButton.className = "hide";
                     recaptureButton.className = "green";
+                    cloneButton.className = "blue";
                     cancelButton.className = "red";
                 };
             }, false);
@@ -171,8 +163,12 @@ var swiftgif = {
             alert("Successfully added image to list of GIF frames!");
             swiftgif.resetPage();
         },
+        clone: function() {
+            swiftgif.framesPanel.add();
+        },
         update: function() {
-            var originalFrameElement = document.getElementById(swiftgif.updateId);
+            var originalFrameElement = document.getElementById(swiftgif.updateId),
+                imagePreview = document.getElementById("imagePreview");
                 
             // Clone the imagePreview element to retrieve its image. Cloning must
             // be used because retrieving its image from the original element
@@ -183,6 +179,24 @@ var swiftgif = {
             originalFrameElement.width = 100;
             
             alert("Successfully updated frame!");
+            swiftgif.resetPage();
+        },
+        clearAll: function() {
+            var doDelete = confirm("Are you sure you want to remove all frames?"),
+                framesList = document.getElementById("framesList");
+            
+            if (doDelete) {
+                var element = framesList.firstElementChild;
+                element = element.nextElementSibling;
+                while (element) {
+                    var nextElement = element.nextElementSibling;
+                    framesList.removeChild(element);
+                    element = nextElement;
+                }
+                
+                swiftgif.nextUpdateId = 0;
+            }
+            
             swiftgif.resetPage();
         }
     }
