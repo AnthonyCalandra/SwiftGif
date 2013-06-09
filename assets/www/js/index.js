@@ -21,18 +21,20 @@ var swiftgif = {
     // Application Constructor
     initialize: function() {
         this.bindEvents();
+        // Keeps track of the next image id to set.
         this.nextUpdateId = 0;
-        this.frames = [];
+        // The image element that is being updated/cloned.
+        this.updateId = "";
     },
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
         document.addEventListener("deviceready", this.onDeviceReady, false);
         document.getElementById("captureButton").addEventListener("click", function() {
-            swiftgif.onCaptureMedia("image", false);
+            swiftgif.onCaptureMedia(false);
         }, false);
         document.getElementById("recaptureButton").addEventListener("click", function() {
-            swiftgif.onCaptureMedia("image", true);
+            swiftgif.onCaptureMedia(true);
         }, false);
         document.getElementById("addButton").addEventListener("click", this.framesPanel.add, false);
         document.getElementById("updateButton").addEventListener("click", this.framesPanel.update, false);
@@ -43,7 +45,7 @@ var swiftgif = {
     onDeviceReady: function() {
     },
     // Invoked when a user attempts to take a picture/capture a video.
-    onCaptureMedia: function(type, recapture) {
+    onCaptureMedia: function(recapture) {
         var options = {
             quality: 50,
             destinationType: Camera.DestinationType.FILE_URI,
