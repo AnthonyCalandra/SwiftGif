@@ -1,20 +1,28 @@
-function GIFEncoder() {
-    this.byteArray = [];
+function GIFEncoder(byteArray, canvasWidth, canvasHeight) {
+    this.byteArray = byteArray;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
 }
 
 GIFEncoder.prototype = {
-    writeUnsignedByte: function(val) {
-        // Write an unsigned byte.
-        this.byteArray.push(val & 0xFF);
+    start: function() {
+        this.byteArray.writeUTFBytes("GIF89a");
+        this.writeLSD();
+        this.writeGlobalColorTable();
     },
-    writeUTFBytes: function(val) {
-        // Iterate through every character and store its ASCII value.
-        for (var index = 0; index < val.length; index++)
-            this.byteArray.push(val.charAt(index));
+    // Logical Screen Descriptor
+    writeLSD: function() {
+        // Canvas width and height.
+        this.byteArray.writeUnsignedWord(this.canvasWidth);
+        this.byteArray.writeUnsignedWord(this.canvasHeight);
+        // Packed byte: Global color table set, 8 bits/pixel, no sort, 2^8 table size.
+        this.byteArray.writeUnsignedByte(0x80 | 0x70 | 0x7);
+        // Background color index.
+        this.byteArray.writeUnsignedByte(0);
+        // Pixel-aspect ratio.
+        this.byteArray.writeUnsignedByte(0);
     },
-    writeUnsignedWord: function(val) {
-        // Store the unsigned word (16 bits) as 2 bytes each.
-        this.writeUnsignedByte(val >> 8);
-        this.writeUnsignedByte(val);
+    writeGlobalColorTable: function() {
+        
     }
 };

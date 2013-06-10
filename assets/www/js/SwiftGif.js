@@ -21,10 +21,11 @@ var swiftgif = {
     // Application Constructor
     initialize: function() {
         this.bindEvents();
-        // Keeps track of the next image id to set.
-        this.nextUpdateId = 0;
         // The image element that is being updated/cloned.
-        this.updateId = "";
+        this.updateId = 0;
+        this.nextFrameId = 1;
+        this.currentFrameId = -1;
+        this.frames = [];
     },
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
@@ -44,6 +45,33 @@ var swiftgif = {
     },
     onDeviceReady: function() {
     },
+    addFrame: function(image) {
+        this.frames.push(new Frame(++this.currentFrameId, image));
+        this.nextFrameId++;
+    },
+    updateFrame: function(frameId, image) {
+        var oldFrame = this.getFrameById(frameId);
+        if (oldFrame === null)
+            return;
+        
+        this.frames[this.getFrameIndex(frameId)] = new Frame(oldFrame.frameId, image);
+    },
+    getFrameById: function(frameId) {
+        for (var index = 0; index < this.frames.length; index++) {
+            if (this.frames[index].getFrameId() === frameId)
+                return this.frames[index];
+        }
+        
+        return null;
+    },
+    getFrameIndex: function(frameId) {
+        for (var index = 0; index < this.frames.length; index++) {
+            if (this.frames[index].getFrameId() === frameId)
+                return index;
+        }
+        
+        return -1;
+    },      
     // Invoked when a user attempts to take a picture/capture a video.
     onCaptureMedia: function(recapture) {
         var options = {
@@ -66,6 +94,7 @@ var swiftgif = {
         // Use the stored image file for the JS Image object.
         image.src = imageURI;
         image.onload = function() {
+            swiftgif.addFrame(image);
             swiftgif.addToPreviewer(image);
             addButton.className = "green";
             captureButton.className = "hide";
@@ -75,12 +104,15 @@ var swiftgif = {
     onRecaptureSuccess: function(imageURI) {
         var image = new Image(),
             updateButton = document.getElementById("updateButton"),
-            recaptureButton = document.getElementById("recaptureButton");
+            recaptureButton = document.getElementById("recaptureButton"),
+            cloneButton = document.getElementById("cloneButton");
         
         // Use the stored image file for the JS Image object.
         image.src = imageURI;
         image.onload = function() {
+            swiftgif.addFrame(image);
             swiftgif.addToPreviewer(image);
+            cloneButton.className = "hide";
             updateButton.className = "green";
             recaptureButton.className = "hide";
         };
@@ -123,22 +155,23 @@ var swiftgif = {
         recaptureButton.className = "hide";
         updateButton.className = "hide";
         cloneButton.className = "hide";
-        this.updateId = "";
+        if (this.updateId !== 0) {
+            this.updateId = 0;
+            // Pop the temporary frame off the list.
+            this.frames.pop();
+        }
     },
     framesPanel: {
         add: function() {
             var framesList = document.getElementById("framesList"),
                 frameImageElement = document.createElement("img"),
-                imagePreview = document.getElementById("imagePreview");
-                
-            // Clone the imagePreview element to retrieve its image. Cloning must
-            // be used because retrieving its image from the original element
-            // doesn't allow the previewer image to be destroyed later in resetPage().
-            frameImageElement.src = imagePreview.cloneNode(true).firstChild.src;
+                frame = swiftgif.getFrameById(swiftgif.currentFrameId);
+
+            frameImageElement.src = frame.getImage().src;
             // Resize it into a thumbnail.
             frameImageElement.height = 100;
             frameImageElement.width = 100;
-            frameImageElement.id = "frameImage" + swiftgif.nextUpdateId++;
+            frameImageElement.id = "frameImage" + frame.getFrameId();
             
             frameImageElement.addEventListener("click", function() {
                 // Use the original framed image.
@@ -151,7 +184,7 @@ var swiftgif = {
                         cloneButton = document.getElementById("cloneButton");
                         
                     swiftgif.addToPreviewer(previewImage);
-                    swiftgif.updateId = frameImageElement.id;
+                    swiftgif.updateId = frame.getFrameId();
                     captureButton.className = "hide";
                     recaptureButton.className = "green";
                     cloneButton.className = "blue";
@@ -166,16 +199,16 @@ var swiftgif = {
             swiftgif.resetPage();
         },
         clone: function() {
+            var frameToClone = swiftgif.getFrameById(swiftgif.updateId);
+            swiftgif.addFrame(frameToClone.getImage());
             swiftgif.framesPanel.add();
         },
         update: function() {
-            var originalFrameElement = document.getElementById(swiftgif.updateId),
-                imagePreview = document.getElementById("imagePreview");
-                
-            // Clone the imagePreview element to retrieve its image. Cloning must
-            // be used because retrieving its image from the original element
-            // doesn't allow the previewer image to be destroyed later in resetPage().
-            originalFrameElement.src = imagePreview.cloneNode(true).firstChild.src;
+            var originalFrameElement = document.getElementById("frameImage" + swiftgif.updateId),
+                updatedFrame = swiftgif.getFrameById(swiftgif.currentFrameId);
+            
+            swiftgif.updateFrame(swiftgif.updateId, updatedFrame.getImage());
+            originalFrameElement.src = updatedFrame.getImage().src;
             // Resize it into a thumbnail.
             originalFrameElement.height = 100;
             originalFrameElement.width = 100;
@@ -196,7 +229,10 @@ var swiftgif = {
                     element = nextElement;
                 }
                 
-                swiftgif.nextUpdateId = 0;
+                swiftgif.updateId = 0;
+                swiftgif.nextFrameId = 1;
+                swiftgif.currentFrameId = -1;
+                swiftgif.frames = [];
             }
             
             swiftgif.resetPage();
