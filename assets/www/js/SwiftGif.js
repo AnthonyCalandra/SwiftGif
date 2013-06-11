@@ -23,9 +23,9 @@ var swiftgif = {
         this.bindEvents();
         // The image element that is being updated/cloned.
         this.updateId = 0;
-        this.nextFrameId = 1;
         this.currentFrameId = -1;
         this.frames = [];
+        this.tempImage = null;
     },
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
@@ -37,17 +37,32 @@ var swiftgif = {
         document.getElementById("recaptureButton").addEventListener("click", function() {
             swiftgif.onCaptureMedia(true);
         }, false);
-        document.getElementById("addButton").addEventListener("click", this.framesPanel.add, false);
-        document.getElementById("updateButton").addEventListener("click", this.framesPanel.update, false);
-        document.getElementById("cancelButton").addEventListener("click", this.resetPage, false);
+        document.getElementById("addButton").addEventListener("click", function() {
+            var image = new Image();
+
+            // Use the stored image file for the JS Image object.
+            image.src = swiftgif.tempImage;
+            image.onload = function() {
+                swiftgif.addFrame(image);
+                swiftgif.framesPanel.add();
+            };
+        }, false);
+        document.getElementById("updateButton").addEventListener("click", function() {
+            swiftgif.addFrame(swiftgif.tempImage);
+            swiftgif.framesPanel.update();
+        }, false);
+        document.getElementById("cancelButton").addEventListener("click", function() {
+            swiftgif.resetPage();
+        }, false);
         document.getElementById("clearAllButton").addEventListener("click", this.framesPanel.clearAll, false);
         document.getElementById("cloneButton").addEventListener("click", this.framesPanel.clone, false);
+        document.getElementById("showSettingsButton").addEventListener("click", this.showGifPage, false);
+        document.getElementById("createGifButton").addEventListener("click", this.createGif, false);
     },
     onDeviceReady: function() {
     },
     addFrame: function(image) {
         this.frames.push(new Frame(++this.currentFrameId, image));
-        this.nextFrameId++;
     },
     updateFrame: function(frameId, image) {
         var oldFrame = this.getFrameById(frameId);
@@ -71,7 +86,20 @@ var swiftgif = {
         }
         
         return -1;
-    },      
+    },
+    showGifPage: function() {
+        var framesList = document.getElementById("framesList"),
+            createGifButton = document.getElementById("createGifButton"),
+            showSettingsButton = document.getElementById("showSettingsButton"),
+            captureButton = document.getElementById("captureButton"),
+            cancelButton = document.getElementById("cancelButton");
+        
+        framesList.className = "hide";
+        createGifButton.className = "orange";
+        showSettingsButton.className = "hide";
+        captureButton.className = "hide";
+        cancelButton.className = "red";
+    },
     // Invoked when a user attempts to take a picture/capture a video.
     onCaptureMedia: function(recapture) {
         var options = {
@@ -89,15 +117,21 @@ var swiftgif = {
     },
     onCaptureSuccess: function(imageURI) {
         var image = new Image(),
-            addButton = document.getElementById("addButton");
+            addButton = document.getElementById("addButton"),
+            captureButton = document.getElementById("captureButton"),
+            cancelButton = document.getElementById("cancelButton"),
+            showSettingsButton = document.getElementById("showSettingsButton"),
+            framesList = document.getElementById("framesList");
         
         // Use the stored image file for the JS Image object.
         image.src = imageURI;
         image.onload = function() {
-            swiftgif.addFrame(image);
+            swiftgif.tempImage = imageURI;
             swiftgif.addToPreviewer(image);
             addButton.className = "green";
+            framesList.className = "hide";
             captureButton.className = "hide";
+            showSettingsButton.className = "hide";
             cancelButton.className = "red";
         };
     },
@@ -105,14 +139,18 @@ var swiftgif = {
         var image = new Image(),
             updateButton = document.getElementById("updateButton"),
             recaptureButton = document.getElementById("recaptureButton"),
-            cloneButton = document.getElementById("cloneButton");
+            cloneButton = document.getElementById("cloneButton"),
+            showSettingsButton = document.getElementById("showSettingsButton"),
+            framesList = document.getElementById("framesList");
         
         // Use the stored image file for the JS Image object.
         image.src = imageURI;
         image.onload = function() {
-            swiftgif.addFrame(image);
+            swiftgif.tempImage = imageURI;
             swiftgif.addToPreviewer(image);
             cloneButton.className = "hide";
+            showSettingsButton.className = "hide";
+            framesList.className = "hide";
             updateButton.className = "green";
             recaptureButton.className = "hide";
         };
@@ -146,20 +184,27 @@ var swiftgif = {
             addButton = document.getElementById("addButton"),
             recaptureButton = document.getElementById("recaptureButton"),
             updateButton = document.getElementById("updateButton"),
-            cloneButton = document.getElementById("cloneButton");
+            cloneButton = document.getElementById("cloneButton"),
+            showSettingsButton = document.getElementById("showSettingsButton"),
+            createGifButton = document.getElementById("createGifButton"),
+            framesList = document.getElementById("framesList");
             
-        imagePreview.removeChild(imagePreview.firstChild);
+        if (imagePreview.firstChild !== null)
+            imagePreview.removeChild(imagePreview.firstChild);
+        
+        showSettingsButton.className = "hide";
         captureButton.className = "green";
         addButton.className = "hide";
         cancelButton.className = "hide";
         recaptureButton.className = "hide";
         updateButton.className = "hide";
         cloneButton.className = "hide";
-        if (this.updateId !== 0) {
-            this.updateId = 0;
-            // Pop the temporary frame off the list.
-            this.frames.pop();
-        }
+        createGifButton.className = "hide";
+        showSettingsButton.className = "hide";
+        framesList.className = "show";
+        
+        if (swiftgif.frames.length > 0 && swiftgif.updateId === 0)
+            showSettingsButton.className = "orange";
     },
     framesPanel: {
         add: function() {
@@ -213,6 +258,8 @@ var swiftgif = {
             originalFrameElement.height = 100;
             originalFrameElement.width = 100;
             
+            // The temporary frame is no longer needed.
+            swiftgif.frames.pop();
             alert("Successfully updated frame!");
             swiftgif.resetPage();
         },

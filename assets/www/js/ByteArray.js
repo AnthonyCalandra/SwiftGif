@@ -22,5 +22,5 @@ ByteArray.prototype = {
         this.writeUnsignedByte(g);
         this.writeUnsignedByte(b);
         //this.byteArray.push(((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF));
-    }    
+    }
 };
