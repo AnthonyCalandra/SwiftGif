@@ -66,6 +66,7 @@ var swiftgif = {
         document.getElementById("createGifButton").addEventListener("click", this.createGif, false);
     },
     onDeviceReady: function() {
+        
     },
     addFrame: function(image) {
         this.frames.push(new Frame(++this.currentFrameId, image));
@@ -185,7 +186,73 @@ var swiftgif = {
         }
     },
     createGif: function() {
-        alert("Creating gif...");
+        var canvasWidth = new Number(document.getElementById("canvasWidth").value),
+            canvasHeight = new Number(document.getElementById("canvasHeight").value),
+            delayTime = new Number(document.getElementById("delayTime").value),
+            canvas = document.createElement("canvas"),
+            context = canvas.getContext("2d");
+        
+        if (canvas === null) {
+            alert("Unable to initialize canvas!");
+            return;
+        }
+    
+        if (canvasWidth === NaN || !(canvasWidth !== NaN && canvasWidth > 0)) {
+            alert("Canvas width must be bigger than zero!");
+            return;
+        }
+        
+        if (canvasHeight === NaN || !(canvasHeight !== NaN && canvasHeight > 0)) {
+            alert("Canvas height must be bigger than zero!");
+            return;
+        }
+        
+        if (delayTime === NaN || !(delayTime !== NaN && delayTime > 0)) {
+            alert("Delay time must be  longer than zero milliseconds!");
+            return;
+        }
+        
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        // Use a black blackground as the drawing canvas.
+        context.fillStyle = "rgb(0,0,0)";
+        context.fillRect(0, 0, canvasWidth, canvasHeight);
+        
+        var byteArray = new ByteArray(),
+            encoder = new GIFEncoder(byteArray, canvasWidth, canvasHeight, delayTime);
+    
+        encoder.start();
+        for (var index = 0; index < swiftgif.frames.length; index++) {
+            var frame = swiftgif.frames[index];
+            context.drawImage(frame.image, 0, 0, canvasWidth, canvasHeight);
+            encoder.addFrame(context);
+        }
+        
+        encoder.finish();
+        var image = new Image();
+        image.src = "data:image/gif;base64," + encode64(byteArray.getData());
+        image.onload = function() {
+            swiftgif.addToPreviewer(image);
+            alert("DONE");
+        };
+        
+        //window.binarystring = encoder.stream().getData();
+        //window.requestFileSystem(LocalFileSystem.TEMPORARY, 0, swiftgif.gotFS, swiftgif.fail);
+    },
+    gotFS:function(fileSystem) {
+        fileSystem.root.getFile("wat.txt", {create: true, exclusive: false}, swiftgif.gotFileEntry, swiftgif.fail);
+    },
+
+    gotFileEntry:function(fileEntry) {
+        fileEntry.createWriter(swiftgif.gotFileWriter, swiftgif.fail);
+    },
+
+    gotFileWriter:function(writer) {
+        writer.write(new Blob(window.binarystring, {type: "image/gif"}));
+    },
+
+    fail: function(error) {
+        console.log(error.code);
     },
     // Returns the UI to its default state.
     resetPage: function() {
@@ -204,6 +271,9 @@ var swiftgif = {
         if (imagePreview.firstChild !== null)
             imagePreview.removeChild(imagePreview.firstChild);
         
+        imagePreview.style.width = 500 + "px";
+        imagePreview.style.height = 500 + "px";
+        
         showSettingsButton.className = "hide";
         captureButton.className = "green";
         addButton.className = "hide";
@@ -213,8 +283,12 @@ var swiftgif = {
         cloneButton.className = "hide";
         createGifButton.className = "hide";
         showSettingsButton.className = "hide";
-        framesList.className = "show";
         imageSettings.className = "hide";
+        
+        if (swiftgif.frames.length > 0)
+            framesList.className = "show";
+        else
+            framesList.className = "hide";
         
         if (swiftgif.frames.length > 0 && swiftgif.updateId === 0)
             showSettingsButton.className = "orange";
@@ -256,6 +330,7 @@ var swiftgif = {
             framesList.appendChild(frameImageElement);
             
             alert("Successfully added image to list of GIF frames!");
+            swiftgif.updateId = 0;
             swiftgif.resetPage();
         },
         clone: function() {
@@ -276,6 +351,7 @@ var swiftgif = {
             // The temporary frame is no longer needed.
             swiftgif.frames.pop();
             alert("Successfully updated frame!");
+            swiftgif.updateId = 0;
             swiftgif.resetPage();
         },
         clearAll: function() {

@@ -48,11 +48,14 @@
             <label for="delayTime">Display interval (ms):</label>
             <input id="delayTime" type="text" name="delayTime" value="500" />
         </div>
-        <div id="framesList">
+        <div id="framesList" class="hide">
             <input id="clearAllButton" class="red" type="button" value="Clear All" />
         </div>
         <script type="text/javascript" src="cordova-2.7.0.js"></script>
+        <script type="text/javascript" src="js/base64.js"></script>
         <script type="text/javascript" src="js/ByteArray.js"></script>
+        <script type="text/javascript" src="js/libs/LZWEncoder.js"></script>
+        <script type="text/javascript" src="js/libs/NeuQuant.js"></script>
         <script type="text/javascript" src="js/GIFEncoder.js"></script>
         <script type="text/javascript" src="js/Frame.js"></script>
         <script type="text/javascript" src="js/SwiftGif.js"></script>
