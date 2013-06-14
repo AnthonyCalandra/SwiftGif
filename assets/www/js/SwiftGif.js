@@ -236,26 +236,21 @@ var swiftgif = {
         var image = new Image();
         image.src = "data:image/gif;base64," + encode64(byteArray.getData());
         image.onload = function() {
+            var fileName = prompt("Enter the name of your gif file: ");
+            if (fileName !== null && fileName.length > 0) {
+                window.plugins.base64ToGIF.saveImage(encode64(byteArray.getData()), 
+                    {
+                        filename: fileName, 
+                        overwrite: true
+                    }, 
+                    function(result) {}, 
+                    function(error) {
+                        alert(error);
+                    });
+            }
+            
             swiftgif.addToPreviewer(image);
         };
-        
-        //window.binarystring = encoder.stream().getData();
-        //window.requestFileSystem(LocalFileSystem.TEMPORARY, 0, swiftgif.gotFS, swiftgif.fail);
-    },
-    gotFS:function(fileSystem) {
-        fileSystem.root.getFile("wat.txt", {create: true, exclusive: false}, swiftgif.gotFileEntry, swiftgif.fail);
-    },
-
-    gotFileEntry:function(fileEntry) {
-        fileEntry.createWriter(swiftgif.gotFileWriter, swiftgif.fail);
-    },
-
-    gotFileWriter:function(writer) {
-        writer.write(new Blob(window.binarystring, {type: "image/gif"}));
-    },
-
-    fail: function(error) {
-        console.log(error.code);
     },
     // Returns the UI to its default state.
     resetPage: function() {
