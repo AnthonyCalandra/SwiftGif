@@ -39,14 +39,36 @@
             <input id="cancelButton" class="hide" type="button" value="Cancel" />
         </div>
         <div id="imageSettings" class="hide">
-            <label for="canvasWidth">Canvas Width:</label>
-            <input id="canvasWidth" type="text" name="canvasWidth" value="100" />
-            <br />
-            <label for="canvasHeight">Canvas Height:</label>
-            <input id="canvasHeight" type="text" name="canvasHeight" value="100" />
-            <br />
-            <label for="delayTime">Display interval (ms):</label>
-            <input id="delayTime" type="text" name="delayTime" value="500" />
+            <table>
+                <tr>
+                    <td>
+                        <label for="canvasWidth">Canvas Width:</label>
+                    </td>
+                    <td>
+                        <input id="canvasWidth" type="text" name="canvasWidth" value="500" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="canvasHeight">Canvas Height:</label>
+                    </td>
+                    <td>
+                        <input id="canvasHeight" type="text" name="canvasHeight" value="500" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="delayTime">Display interval (ms):</label>
+                    </td>
+                    <td>
+                        <input id="delayTime" type="text" name="delayTime" value="500" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="imageDesc" class="hide">
+            <span>Note: Adding frames takes a bit of time so please be patient. The
+more frames used and the larger the image size takes SwiftGif longer to create gifs.</span>
         </div>
         <div id="framesList" class="hide">
             <input id="clearAllButton" class="red" type="button" value="Clear All" />
