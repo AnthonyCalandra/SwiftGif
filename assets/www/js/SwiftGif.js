@@ -20,17 +20,21 @@
 var swiftgif = {
     // Application Constructor
     initialize: function() {
-        swiftgif.bindEvents();
+        document.addEventListener("deviceready", swiftgif.onDeviceReady, false);
         // The image element that is being updated/cloned.
         swiftgif.updateId = 0;
         swiftgif.currentFrameId = -1;
         swiftgif.frames = [];
         swiftgif.tempImage = null;
     },
+    onDeviceReady: function() {
+        swiftgif.bindEvents();
+    },
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
-        document.addEventListener("deviceready", swiftgif.onDeviceReady, false);
+        // Completely disable back button (causes app to crash when making gifs - thanks dad!).
+        document.addEventListener("backbutton", function() {}, false);
         document.getElementById("captureButton").addEventListener("click", function() {
             swiftgif.onCaptureMedia(false);
         }, false);
@@ -64,8 +68,6 @@ var swiftgif = {
         document.getElementById("cloneButton").addEventListener("click", swiftgif.framesPanel.clone, false);
         document.getElementById("showSettingsButton").addEventListener("click", swiftgif.showGifPage, false);
         document.getElementById("createGifButton").addEventListener("click", swiftgif.createGif, false);
-    },
-    onDeviceReady: function() {
     },
     addFrame: function(image) {
         swiftgif.frames.push(new Frame(++swiftgif.currentFrameId, image));
