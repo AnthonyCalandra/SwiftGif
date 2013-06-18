@@ -115,11 +115,11 @@ var swiftgif = {
     // Invoked when a user attempts to take a picture/capture a video.
     onCaptureMedia: function(recapture) {
         var options = {
-            quality: 50,
+            quality: 95,
             destinationType: Camera.DestinationType.FILE_URI,
             // Aspect ratios don't guarantee these values.
-            targetWidth: 700,
-            targetHeight: 900,
+            targetWidth: 800,
+            targetHeight: 1000,
             correctOrientation: true,
             saveToPhotoAlbum: false
         };
@@ -236,21 +236,21 @@ var swiftgif = {
         var image = new Image();
         image.src = "data:image/gif;base64," + encode64(byteArray.getData());
         image.onload = function() {
-            var fileName = prompt("Enter the name of your gif file: ");
-            if (fileName !== null && fileName.length > 0) {
-                window.plugins.base64ToGIF.saveImage(encode64(byteArray.getData()), 
-                    {
-                        filename: fileName, 
-                        overwrite: true
-                    }, 
-                    function(result) {}, 
-                    function(error) {
-                        alert(error);
-                    });
-            }
-            
             swiftgif.addToPreviewer(image);
         };
+        
+        var fileName = prompt("Enter the name of your gif file: ");
+        if (fileName !== null && fileName.length > 0) {
+            window.plugins.base64ToGIF.saveImage(encode64(byteArray.getData()), 
+                {
+                    filename: fileName, 
+                    overwrite: true
+                }, 
+                function(result) {}, 
+                function(error) {
+                    alert(error);
+                });
+        }
     },
     // Returns the UI to its default state.
     resetPage: function() {
