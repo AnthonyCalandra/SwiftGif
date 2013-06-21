@@ -1,3 +1,5 @@
+// Retrieved from the internet. Somewhere...
+
 function encode64(input) {
     var output = "", i = 0, l = input.length,
             key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",

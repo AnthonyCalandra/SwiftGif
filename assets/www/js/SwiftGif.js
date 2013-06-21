@@ -70,16 +70,21 @@ var swiftgif = {
         document.getElementById("createGifButton").addEventListener("click", swiftgif.createGif, false);
     },
     addFrame: function(image) {
+        // Add the frame to the list of frames and increment the frame id.
         swiftgif.frames.push(new Frame(++swiftgif.currentFrameId, image));
     },
     updateFrame: function(frameId, image) {
         var oldFrame = swiftgif.getFrameById(frameId);
+        // No sense updating a null frame.
         if (oldFrame === null)
             return;
         
+        // Replace the frame at the index with the new Frame object.
+        // The new frame object contains the new image but same id.
         swiftgif.frames[swiftgif.getFrameIndex(frameId)] = new Frame(oldFrame.frameId, image);
     },
     getFrameById: function(frameId) {
+        // Iterate through the list until a matching frame id is found.
         for (var index = 0; index < swiftgif.frames.length; index++) {
             if (swiftgif.frames[index].getFrameId() === frameId)
                 return swiftgif.frames[index];
@@ -88,6 +93,7 @@ var swiftgif = {
         return null;
     },
     getFrameIndex: function(frameId) {
+        // Iterate through the list until a matching frame id is found.
         for (var index = 0; index < swiftgif.frames.length; index++) {
             if (swiftgif.frames[index].getFrameId() === frameId)
                 return index;
@@ -124,7 +130,9 @@ var swiftgif = {
             saveToPhotoAlbum: false
         };
         
+        // Recapturing or capturing? Determine which success callback to use.
         var successCallback = recapture ? swiftgif.onRecaptureSuccess : swiftgif.onCaptureSuccess;
+        // Take the picture!
         navigator.camera.getPicture(successCallback, swiftgif.onCameraFailure, options);
     },
     onCaptureSuccess: function(imageURI) {
@@ -138,6 +146,7 @@ var swiftgif = {
         // Use the stored image file for the JS Image object.
         image.src = imageURI;
         image.onload = function() {
+            // Add the image URI to the temp variable for later.
             swiftgif.tempImage = imageURI;
             swiftgif.addToPreviewer(image);
             addButton.className = "green";
@@ -158,6 +167,7 @@ var swiftgif = {
         // Use the stored image file for the JS Image object.
         image.src = imageURI;
         image.onload = function() {
+            // Add the image URI to the temp variable for later.
             swiftgif.tempImage = imageURI;
             swiftgif.addToPreviewer(image);
             cloneButton.className = "hide";
@@ -196,26 +206,31 @@ var swiftgif = {
             canvas = document.createElement("canvas"),
             context = canvas.getContext("2d");
         
+        // Most likely canvas isn't supported at this point. Older phone?
         if (canvas === null) {
             alert("Unable to initialize canvas!");
             return;
         }
     
+        // Canvas width must be a number greater than zero.
         if (canvasWidth === NaN || !(canvasWidth !== NaN && canvasWidth > 0)) {
             alert("Canvas width must be bigger than zero!");
             return;
         }
         
+        // Canvas height must be a number greater than zero.
         if (canvasHeight === NaN || !(canvasHeight !== NaN && canvasHeight > 0)) {
             alert("Canvas height must be bigger than zero!");
             return;
         }
         
+        // Delay time must be a number greater than zero.
         if (delayTime === NaN || !(delayTime !== NaN && delayTime > 0)) {
             alert("Delay time must be longer than zero milliseconds!");
             return;
         }
         
+        // Image quality must be between one and ten.
         if (imageQuality === NaN || !(imageQuality !== NaN && (imageQuality >= 1 && imageQuality <= 10))) {
             alert("Image quality must be between one and ten!");
             return;
@@ -228,17 +243,25 @@ var swiftgif = {
         context.fillStyle = "rgb(0,0,0)";
         context.fillRect(0, 0, canvasWidth, canvasHeight);
         
+        // Create the bytearray which will hold the gif file and initialize the encoder.
         var byteArray = new ByteArray(),
             encoder = new GIFEncoder(byteArray, canvasWidth, canvasHeight, delayTime, imageQuality);
 
+        // Begin the encoding process.
         encoder.start();
+        // Add each frame at a time from the list.
         for (var index = 0; index < swiftgif.frames.length; index++) {
             var frame = swiftgif.frames[index];
+            
+            // Draw the image to the canvas and use the canvas object to encode the frame.
             context.drawImage(frame.image, 0, 0, canvasWidth, canvasHeight);
             encoder.addFrame(context);
         }
         
+        // Add the gif trailer byte (finished!).
         encoder.finish();
+        
+        // Show the image on the previewer.
         var image = new Image();
         image.src = "data:image/gif;base64," + encode64(byteArray.getData());
         image.onload = function() {
@@ -246,7 +269,9 @@ var swiftgif = {
         };
         
         var fileName = prompt("Enter the name of your gif file: ");
+        // Filename must be valid.
         if (fileName !== null && fileName.length > 0) {
+            // Save the image to the device's filesystem.
             window.plugins.base64ToGIF.saveImage(encode64(byteArray.getData()), 
                 {
                     filename: fileName, 
@@ -364,15 +389,19 @@ var swiftgif = {
             var doDelete = confirm("Are you sure you want to remove all frames?"),
                 framesList = document.getElementById("framesList");
             
+            // If the user wants to delete...
             if (doDelete) {
                 var element = framesList.firstElementChild;
                 element = element.nextElementSibling;
+                // Get each element (except the first - the button!) and delete every one.
+                // These elements are the thumbnail-sized frames.
                 while (element) {
                     var nextElement = element.nextElementSibling;
                     framesList.removeChild(element);
                     element = nextElement;
                 }
                 
+                // Reset some properties.
                 swiftgif.updateId = 0;
                 swiftgif.nextFrameId = 1;
                 swiftgif.currentFrameId = -1;
