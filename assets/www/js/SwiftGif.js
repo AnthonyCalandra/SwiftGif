@@ -192,6 +192,7 @@ var swiftgif = {
         var canvasWidth = new Number(document.getElementById("canvasWidth").value),
             canvasHeight = new Number(document.getElementById("canvasHeight").value),
             delayTime = new Number(document.getElementById("delayTime").value),
+            imageQuality = new Number(document.getElementById("imageQuality").value),
             canvas = document.createElement("canvas"),
             context = canvas.getContext("2d");
         
@@ -211,7 +212,12 @@ var swiftgif = {
         }
         
         if (delayTime === NaN || !(delayTime !== NaN && delayTime > 0)) {
-            alert("Delay time must be  longer than zero milliseconds!");
+            alert("Delay time must be longer than zero milliseconds!");
+            return;
+        }
+        
+        if (imageQuality === NaN || !(imageQuality !== NaN && (imageQuality >= 1 && imageQuality <= 10))) {
+            alert("Image quality must be between one and ten!");
             return;
         }
         
@@ -223,7 +229,7 @@ var swiftgif = {
         context.fillRect(0, 0, canvasWidth, canvasHeight);
         
         var byteArray = new ByteArray(),
-            encoder = new GIFEncoder(byteArray, canvasWidth, canvasHeight, delayTime);
+            encoder = new GIFEncoder(byteArray, canvasWidth, canvasHeight, delayTime, imageQuality);
 
         encoder.start();
         for (var index = 0; index < swiftgif.frames.length; index++) {

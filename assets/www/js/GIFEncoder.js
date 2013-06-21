@@ -1,9 +1,10 @@
-function GIFEncoder(byteArray, canvasWidth, canvasHeight, delay) {
+function GIFEncoder(byteArray, canvasWidth, canvasHeight, delay, imageQuality) {
     this.byteArray = byteArray;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     // Delay time is set as one-hundredths of a second.
     this.delay = Math.round(delay / 10);
+    this.imageQuality = imageQuality;
     this.numFrames = 0;
 }
 
@@ -59,7 +60,7 @@ GIFEncoder.prototype = {
 
                 return rgbPixels;
             })(),
-            nq = new NeuQuant(getImagePixels, getImagePixels.length, 10),
+            nq = new NeuQuant(getImagePixels, getImagePixels.length, this.imageQuality),
             colorPalette = nq.process();
 
         // The first frame.
